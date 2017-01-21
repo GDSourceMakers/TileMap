@@ -394,40 +394,40 @@ namespace BasicUtility.TileMap
 
             for (int i = 0; i < count_x + 1; i++)
             {
-                float x = pos.x + (i * size_x);
+                float x = (i * size_x);
 
-                Vector3 start = Vector3.Scale(rot *
+                Vector3 start = rot * Vector3.Scale(
                     new Vector3(
                         x,
-                        pos.y,
-                        pos.z
+                        0,
+                        0
                     ), trans);
-                Vector3 end = Vector3.Scale(rot *
+                Vector3 end = rot * Vector3.Scale(
                     new Vector3(
                         x,
-                        (pos.y + h),
-                        pos.z
+                        h,
+                        0
                     ), trans);
-                Gizmos.DrawLine(start, end);
+                Gizmos.DrawLine(start+pos, end+pos);
             }
 
             for (int i = 0; i < count_y + 1; i++)
             {
-                float y = pos.y + (i * size_y);
+                float y = (i * size_y);
 
-                Vector3 start = Vector3.Scale(rot *
+                Vector3 start = rot * Vector3.Scale(
                         new Vector3(
-                            pos.x,
+                            0,
                             y,
-                            pos.z
+                            0
                         ), trans);
-                Vector3 end = Vector3.Scale(rot *
+                Vector3 end = rot * Vector3.Scale(
                     new Vector3(
-                        pos.x + w,
+                         w,
                         y,
-                        pos.z
+                        0
                     ), trans);
-                Gizmos.DrawLine(start, end);
+                Gizmos.DrawLine(start+pos, end+pos);
             }
 
             Gizmos.color = Color.white;
