@@ -25,6 +25,8 @@ namespace BasicUtility.TileMap
         SerializedProperty oriantion;
 
         SerializedProperty texSize;
+        SerializedProperty missingtex;
+
         SerializedProperty atlases;
         private ReorderableList atlasesList;
         bool atlasesFold;
@@ -67,6 +69,8 @@ namespace BasicUtility.TileMap
 
             EditorGUILayout.PropertyField(texSize);
 
+            EditorGUILayout.PropertyField(missingtex);
+
             atlasesList.DoLayoutList();
 
             layersFold = serializedObject.FindProperty("layers").isExpanded;
@@ -106,6 +110,7 @@ namespace BasicUtility.TileMap
 
 
             texSize = serializedObject.FindProperty("textureSize");
+            missingtex = serializedObject.FindProperty("missingTexture");
 
             atlases = serializedObject.FindProperty("referenceAtlases");
 

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
-
+/*
 public static class CustomAssetUtility
 {
     public static T CreateAsset<T>() where T : ScriptableObject
@@ -52,3 +52,4 @@ public static class CustomAssetUtility
 		Selection.activeObject = asset;
 	}
 }
+*/

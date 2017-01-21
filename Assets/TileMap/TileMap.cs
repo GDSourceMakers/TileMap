@@ -23,6 +23,7 @@ namespace BasicUtility.TileMap
     [RequireComponent(typeof(PolygonCollider2D))]
     public class TileMap : MonoBehaviour
     {
+        #region variables
         //[Header("Size")]
         public int map_x;
         public int map_y;
@@ -90,6 +91,8 @@ namespace BasicUtility.TileMap
 
 
         bool firstUpdate = true;
+
+        #endregion
 
         // Use this for initialization
         void Awake()
@@ -235,6 +238,21 @@ namespace BasicUtility.TileMap
         }
 
 
+        public Layer GetLayer(string name)
+        {
+            foreach (var item in layers)
+            {
+                if (item.name == name)
+                {
+                    return item;
+                }
+            }
+
+            return null;
+        }
+
+
+
         public void BuildAtlas()
         {
 
@@ -247,6 +265,12 @@ namespace BasicUtility.TileMap
 
             textureArray.Apply(true);
 
+            if (missingTexture == null)
+            {
+                missingTexture = new Texture2D(1, 1);
+                missingTexture.SetPixel(0, 0, new Color(0, 0, 0, 0));
+                missingTexture.Apply();
+            }
             tileMat = new Material(Shader.Find("TileMap/Shader"));
             //atlas.GenerateArray();
             //Debug.Log(atlas.array.filterMode);
@@ -844,8 +868,8 @@ namespace BasicUtility.TileMap
 
         public void GenUvData(int x, int y)
         {
-            int numberTiles = layer.chunkSize_x * layer.chunkSize_y;
-            int verteciesCount = numberTiles * 4;
+            //int numberTiles = layer.chunkSize_x * layer.chunkSize_y;
+            //int verteciesCount = numberTiles * 4;
 
             /*
             input = new Vector2[2][];
@@ -867,20 +891,30 @@ namespace BasicUtility.TileMap
                     {
                         
                         uvChanges[tile + i] = ((IAdvancedSprite)grid[x, y]).GetSprite(x,y,layer).uv[i];
+
+                        for (int k = 0; k < layer.map.referenceAtlases.Count; k++)
+                        {
+                            if (layer.map.referenceAtlases[k] == ((IAdvancedSprite)grid[x, y]).GetSprite(x, y, layer).texture)
+                            {
+                                textureLayer[tile + i] = new Vector2(k, 0);
+                            }
+                        }
                     }
                     else
                     {
                         uvChanges[tile + i] = grid[x, y].sprite.uv[i];
-                    }
 
-
-                    for (int k = 0; k < layer.map.referenceAtlases.Count; k++)
-                    {
-                        if (layer.map.referenceAtlases[k] == ((IAdvancedSprite)grid[x, y]).GetSprite(x, y, layer).texture)
+                        for (int k = 0; k < layer.map.referenceAtlases.Count; k++)
                         {
-                            textureLayer[tile + i] = new Vector2(k, 0);
+                            if (layer.map.referenceAtlases[k] == grid[x, y].sprite.texture)
+                            {
+                                textureLayer[tile + i] = new Vector2(k, 0);
+                            }
                         }
                     }
+
+
+
 
                 }
                 else
@@ -940,7 +974,7 @@ namespace BasicUtility.TileMap
         Layer layer;
         Chunk chunk;
 
-        TilePosition pos;
+        public TilePosition pos { private set; get; }
 
         Sprite _sprite;
         public Sprite sprite
@@ -1039,7 +1073,56 @@ namespace BasicUtility.TileMap
 
         public TilePosition(int layer, int ChunkX, int ChunkY, int posX, int posY, TileMap map)
         {
+            mapGrid = map;
 
+            layerNumber = layer;
+
+            chunk_x = ChunkX;
+            chunk_y = ChunkY;
+
+
+            x = posX;
+            y = posY;
+        }
+
+        public TilePosition(Layer layer, int ChunkX, int ChunkY, int posX, int posY)
+        {
+            mapGrid = layer.map;
+
+            for (int i = 0; i < mapGrid.layers.Count; i++)
+            {
+                if (mapGrid.layers[i] == layer)
+                {
+                    layerNumber = i;
+                }
+            }
+
+            chunk_x = ChunkX;
+            chunk_y = ChunkY;
+
+
+            x = posX;
+            y = posY;
+        }
+
+        public TilePosition(Layer layer, int posX, int posY)
+        {
+            mapGrid = layer.map;
+
+            for (int i = 0; i < mapGrid.layers.Count; i++)
+            {
+                if (mapGrid.layers[i] == layer)
+                {
+                    layerNumber = i;
+                }
+            }
+
+            chunk_x = posX / mapGrid.chunk_size_x;
+            chunk_y = posY / mapGrid.chunk_size_y;
+
+
+            x = posX % mapGrid.chunk_size_x;
+            y = posY % mapGrid.chunk_size_y;
         }
 
         public TilePosition(int layer, int posX, int posY, TileMap map)

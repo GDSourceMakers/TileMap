@@ -73,6 +73,7 @@
 				if (input.uv.z == 255)
 				{
 					color = tex2D(_MissingTex, input.uv);
+
 					//color = float4(0, 0, 0, 0);
 				}
 				else

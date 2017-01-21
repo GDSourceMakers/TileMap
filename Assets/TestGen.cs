@@ -27,7 +27,7 @@ public class TestGen : MonoBehaviour
 			for (int j = 0; j < y_max; j++)
 			{
 
-				//map.grid[i, j, 0] = new TestTileClass(tileSprite);
+				map.grid[i, j, 0] = new TestTileClass(tileSprite);
 
 			}
 		}
@@ -37,7 +37,7 @@ public class TestGen : MonoBehaviour
 
         map.GenerateAllMesh();
 
-		//StartCoroutine(Draw());
+		StartCoroutine(Draw());
 	}
 
 	// Update is called once per frame
