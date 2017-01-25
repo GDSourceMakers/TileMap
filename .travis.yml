@@ -10,7 +10,7 @@ before_install:
 # - chmod +x ./Scripts/Install/stylecop.sh
 # - chmod +x ./Scripts/test.sh
 # - chmod +x ./Scripts/check-style.sh
-# - chmod +x ./Scripts/travis.sh
+ - chmod +x ./Scripts/travis.sh
 env:
 # - JOB=unit-test
 # - JOB=build
