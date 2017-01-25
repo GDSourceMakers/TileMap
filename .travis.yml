@@ -13,8 +13,8 @@ before_install:
  - chmod +x ./Scripts/travis.sh
 env:
 # - JOB=unit-test
-# - JOB=build
- - JOB=stylecop
+ - JOB=build
+# - JOB=stylecop
 script:
 - ./Scripts/travis.sh
 notifications:
