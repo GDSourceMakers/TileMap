@@ -17,7 +17,7 @@ env:
  - JOB=build
 # - JOB=stylecop
 script:
-- ./Scripts/travis.sh
+- travis_wait ./Scripts/travis.sh
 deploy:
   skip_cleanup: true
 notifications:
