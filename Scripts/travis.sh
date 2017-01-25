@@ -9,6 +9,12 @@ if [ "$JOB" == "unit-test" ]; then
    exit $?
 fi
 
+if [ "$JOB" == "build" ]; then
+   
+   ./Scripts/Install/unity.sh
+   ./Scripts/build.sh --travis
+   exit $?
+fi
 
 if [ "$JOB" == "stylecop" ]; then
 	./Scripts/Install/mono.sh
