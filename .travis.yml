@@ -19,6 +19,6 @@ env:
 script:
 - ./Scripts/travis.sh
 deploy:
-	skip_cleanup: true
+  skip_cleanup: true
 notifications:
   email: false
