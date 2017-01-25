@@ -14,4 +14,4 @@ echo "Attempting to build $project for Windows"
 
 echo 'Logs from build'
 logFile="$(pwd)"/unity.log
-travecho "$(cat "$logFile")"
+echo cat "$logFile"
