@@ -13,4 +13,5 @@ echo "Attempting to build $project for Windows"
 "$unityPath" -batchmode -nographics -projectPath "$(pwd)" -exportPackage "Assets\TileMap" \ -logFile $(pwd)/unity.log 
 
 echo 'Logs from build'
-cat $(pwd)/unity.log
+logFile="$(pwd)"/unity.log
+travecho "$(cat "$logFile")"
