@@ -10,7 +10,7 @@ travisUnity="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
 
 unityPath="$travisUnity"
 echo "Attempting to build $project for Windows"
-"$unityPath" -batchmode -nographics -projectPath "$(pwd)" -exportPackage "Assets\TileMap" \ -logFile unity.log 
+"$unityPath" -batchmode -nographics -projectPath "$(pwd)" -exportPackage "Assets\TileMap" \ -logFile $(pwd)/unity.log 
 
 echo 'Logs from build'
 cat $(pwd)/unity.log
