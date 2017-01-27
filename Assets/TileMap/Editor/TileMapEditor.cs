@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
+using System;
 
 namespace BasicUtility.TileMap
 {
@@ -23,11 +24,22 @@ namespace BasicUtility.TileMap
 
         SerializedProperty oriantion;
 
+        SerializedProperty texSize;
+        SerializedProperty missingtex;
+
+        SerializedProperty atlases;
+        private ReorderableList atlasesList;
+        bool atlasesFold;
+
+
         SerializedProperty layers;
-        private ReorderableList list;
+        private ReorderableList layerList;
         bool layersFold;
 
-        public static float ExpandedHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 5;
+		SerializedProperty autoGenMesh;
+		SerializedProperty autoUpdateMesh;
+
+		public static float ExpandedHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 5;
 
         public override void OnInspectorGUI()
         {
@@ -52,23 +64,37 @@ namespace BasicUtility.TileMap
 
             EditorGUILayout.PropertyField(oriantion);
 
+            //EditorGUILayout.PropertyField(atlas);
+            //atlas.objectReferenceValue = (AtlasArray)EditorGUILayout.ObjectField("Atlas Array", (AtlasArray)atlas.objectReferenceValue, typeof(AtlasArray), false);
+
+            EditorGUILayout.PropertyField(texSize);
+
+            EditorGUILayout.PropertyField(missingtex);
+
+            atlasesList.DoLayoutList();
+
             layersFold = serializedObject.FindProperty("layers").isExpanded;
             layersFold = EditorGUILayout.Foldout(layersFold, new GUIContent("Layers", "Tile layers"));
             serializedObject.FindProperty("layers").isExpanded = layersFold;
             if (layersFold)
             {
-                list.DoLayoutList();
+                layerList.DoLayoutList();
                 //layers = serializedObject.FindProperty("layers");
                 //EditorGUILayout.PropertyField(layers,true);
             }
 
+			EditorGUILayout.PropertyField(autoGenMesh);
+			EditorGUILayout.PropertyField(autoUpdateMesh);
 
-            serializedObject.ApplyModifiedProperties();
+			serializedObject.ApplyModifiedProperties();
         }
 
         void OnEnable()
         {
-            tileSize = serializedObject.FindProperty("tileSize");
+            #region Basic
+
+            map_x = serializedObject.FindProperty("map_x");
+            map_y = serializedObject.FindProperty("map_y");
 
             chunkSize_x = serializedObject.FindProperty("chunk_size_x");
             chunkSize_y = serializedObject.FindProperty("chunk_size_y");
@@ -76,39 +102,94 @@ namespace BasicUtility.TileMap
             chunkCount_x = serializedObject.FindProperty("chunk_count_x");
             chunkCount_y = serializedObject.FindProperty("chunk_count_y");
 
-            map_x = serializedObject.FindProperty("map_x");
-            map_y = serializedObject.FindProperty("map_y");
+            tileSize = serializedObject.FindProperty("tileSize");
 
             oriantion = serializedObject.FindProperty("oriantion");
 
-            layers = serializedObject.FindProperty("layers");
+            #endregion
 
 
+            texSize = serializedObject.FindProperty("textureSize");
+            missingtex = serializedObject.FindProperty("missingTexture");
 
-            list = new ReorderableList(serializedObject, serializedObject.FindProperty("layers"), true, true, true, true);
+            atlases = serializedObject.FindProperty("referenceAtlases");
 
-            list.drawElementBackgroundCallback = DrawBack;
+            atlasesList = new ReorderableList(serializedObject, atlases, true, true, true, true);
 
-            list.elementHeightCallback = ElementHeight;
+            //atlasesList.drawElementBackgroundCallback = DrawBack;
 
-            list.elementHeight = EditorGUIUtility.singleLineHeight;
+            atlasesList.elementHeight = EditorGUIUtility.singleLineHeight*1;
 
-            list.drawHeaderCallback = rect =>
+            atlasesList.drawHeaderCallback = rect =>
             {
                 EditorGUI.LabelField(rect, "Layers");
             };
 
-            list.drawElementCallback = DrawLayerList;
+            atlasesList.drawElementCallback = DrawAtlasesList;
 
-            list.onAddCallback = AddItem;
+            atlasesList.onAddCallback = AtlasesAddItem;
+
+
+            #region layers
+
+            layers = serializedObject.FindProperty("layers");
+
+            layerList = new ReorderableList(serializedObject, serializedObject.FindProperty("layers"), true, true, true, true);
+
+            layerList.drawElementBackgroundCallback = DrawBack;
+
+            layerList.elementHeightCallback = LayerElementHeight;
+
+            layerList.elementHeight = EditorGUIUtility.singleLineHeight;
+
+            layerList.drawHeaderCallback = rect =>
+            {
+                EditorGUI.LabelField(rect, "Layers");
+            };
+
+            layerList.drawElementCallback = DrawLayerList;
+
+            layerList.onAddCallback = LayerAddItem;
+
+            #endregion
+
+            autoGenMesh = serializedObject.FindProperty("autoGenMesh");
+			autoUpdateMesh = serializedObject.FindProperty("autoUpdateMesh");
+		}
+
+        private void AtlasesAddItem(ReorderableList list)
+        {
+            TileMap TMap = (TileMap)target;
+            TMap.referenceAtlases.Add(null);
+
+            EditorUtility.SetDirty(target);
         }
 
+        private void DrawAtlasesList(Rect rect, int index, bool isActive, bool isFocused)
+        {
+            SerializedProperty property = atlases.GetArrayElementAtIndex(index);
 
+            Rect spriteRect = new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
 
-        public float ElementHeight(int index)
+            //EditorGUI.PropertyField(spriteRect, property, false);
+
+            property.objectReferenceValue =
+            EditorGUI.ObjectField(spriteRect, property.objectReferenceValue, typeof(Texture2D), false);
+
+            /*
+            property = (Texture2D)EditorGUI.ObjectField(
+                new Rect(rect.x,
+                    rect.y,
+                    rect.width,
+                    EditorGUIUtility.singleLineHeight),
+                new GUIContent("text"), property, typeof(Texture2D), false);
+                */
+        }
+
+        public float LayerElementHeight(int index)
         {
             Repaint();
-            SerializedProperty property = list.serializedProperty.GetArrayElementAtIndex(index);
+            SerializedProperty property = layerList.serializedProperty.GetArrayElementAtIndex(index);
 
             if (property.FindPropertyRelative("isExpanded").boolValue)
             {
@@ -129,7 +210,7 @@ namespace BasicUtility.TileMap
 
         public void DrawLayerList(Rect rect, int index, bool isActive, bool isFocused)
         {
-            SerializedProperty property = list.serializedProperty.GetArrayElementAtIndex(index);
+            SerializedProperty property = layerList.serializedProperty.GetArrayElementAtIndex(index);
 
             bool folded;
 
@@ -173,36 +254,39 @@ namespace BasicUtility.TileMap
 
         public void DrawBack(Rect rect, int index, bool active, bool focused)
         {
-            SerializedProperty property = list.serializedProperty.GetArrayElementAtIndex(index);
+			if (index != -1)
+			{
+				SerializedProperty property = layerList.serializedProperty.GetArrayElementAtIndex(index);
 
-            if (property.FindPropertyRelative("isExpanded").boolValue)
-            {
-                if (!property.FindPropertyRelative("showGrid").boolValue)
-                {
-                    rect.height = ExpandedHeight;
-                }
-                else
-                {
-                    rect.height = ExpandedHeight + (EditorGUIUtility.singleLineHeight);
-                }
-            }
-            else
-            {
-                rect.height = EditorGUIUtility.singleLineHeight;
-            }
-            rect.x += 3;
-            rect.width -= 5;
-            Texture2D tex = new Texture2D(1, 1);
-            tex.SetPixel(0, 0, GUI.skin.settings.selectionColor);
-            tex.Apply();
-            if (active)
-                GUI.DrawTexture(rect, tex as Texture);
+				if (property.FindPropertyRelative("isExpanded").boolValue)
+				{
+					if (!property.FindPropertyRelative("showGrid").boolValue)
+					{
+						rect.height = ExpandedHeight;
+					}
+					else
+					{
+						rect.height = ExpandedHeight + (EditorGUIUtility.singleLineHeight);
+					}
+				}
+				else
+				{
+					rect.height = EditorGUIUtility.singleLineHeight;
+				}
+				rect.x += 3;
+				rect.width -= 5;
+				Texture2D tex = new Texture2D(1, 1);
+				tex.SetPixel(0, 0, GUI.skin.settings.selectionColor);
+				tex.Apply();
+				if (active)
+					GUI.DrawTexture(rect, tex as Texture);
+			}
         }
 
-        public void AddItem(ReorderableList list)
+        public void LayerAddItem(ReorderableList list)
         {
             TileMap TMap = (TileMap)target;
-            TMap.layers.Add(new TileLayer(TMap));
+            TMap.layers.Add(new Layer(TMap));
 
             EditorUtility.SetDirty(target);
         }

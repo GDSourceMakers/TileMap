@@ -1,46 +1,46 @@
 fileFormatVersion: 2
-guid: 968ff402fb6d2a346b797f1b30420020
-timeCreated: 1471621982
+guid: b46ecd72baaa1ae4f8f2d992cc54bc9a
+timeCreated: 1477903218
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: civ_map_textures_0
-    21300002: civ_map_textures_1
-    21300004: civ_map_textures_2
-    21300006: civ_map_textures_3
+    21300000: civ_map_textures - Copy_0
+    21300002: civ_map_textures - Copy_1
+    21300004: civ_map_textures - Copy_2
+    21300006: civ_map_textures - Copy_3
   serializedVersion: 4
   mipmaps:
-    mipMapMode: 0
+    mipMapMode: 1
     enableMipMap: 0
-    sRGBTexture: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 1
-    mipMapFadeDistanceStart: 2
-    mipMapFadeDistanceEnd: 8
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
   bumpmap:
     convertToNormalMap: 0
     externalNormalMap: 0
     heightScale: 0.25
     normalMapFilter: 0
-  isReadable: 1
+  isReadable: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
   seamlessCubemap: 0
-  textureFormat: -1
+  textureFormat: 1
   maxTextureSize: 2048
   textureSettings:
     filterMode: 0
-    aniso: 1
+    aniso: 16
     mipBias: -1
-    wrapMode: 1
+    wrapMode: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 0
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
@@ -48,7 +48,7 @@ TextureImporter:
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
@@ -90,7 +90,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: civ_map_textures_0
+      name: civ_map_textures - Copy_0
       rect:
         serializedVersion: 2
         x: 0
@@ -98,12 +98,12 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: civ_map_textures_1
+      name: civ_map_textures - Copy_1
       rect:
         serializedVersion: 2
         x: 16
@@ -111,12 +111,12 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: civ_map_textures_2
+      name: civ_map_textures - Copy_2
       rect:
         serializedVersion: 2
         x: 32
@@ -124,12 +124,12 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: civ_map_textures_3
+      name: civ_map_textures - Copy_3
       rect:
         serializedVersion: 2
         x: 48
@@ -137,7 +137,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
