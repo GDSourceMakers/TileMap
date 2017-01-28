@@ -1,10 +1,24 @@
-# Example Travis config. See the entire example: https://github.com/JonathanPorta/ci-build
+# adapted from: https://github.com/JonathanPorta/ci-build
 
+# Using objective-c since windows build images are not available
+# The chmod-ing may be uneccesary 
 language: objective-c
-osx_image: xcode61
-rvm:
-- 2.1.2
-install:
-- ./Scripts/install.sh
+osx_image: xcode6.4
+before_install:
+ - chmod +x ./Scripts/Install/unity.sh
+ - chmod +x ./Scripts/Install/mono.sh
+# - chmod +x ./Scripts/Install/stylecop.sh
+# - chmod +x ./Scripts/test.sh
+# - chmod +x ./Scripts/check-style.sh
+ - chmod +x ./Scripts/travis.sh
+ - chmod +x ./Scripts/build.sh
+env:
+# - JOB=unit-test
+ - JOB=build
+# - JOB=stylecop
 script:
-- ./Scripts/build.sh
+- travis_wait ./Scripts/travis.sh
+deploy:
+  skip_cleanup: true
+notifications:
+  email: false
