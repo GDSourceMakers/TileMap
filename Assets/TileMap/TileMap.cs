@@ -37,7 +37,7 @@ namespace BasicUtility.TileMap
         public Vector2 tileSize;
 
         //[Header("Oriantion")]
-        public TileVectorTypes oriantion;
+        public MapOrientation oriantion;
 
         //[Header("Texture")]
         //public AtlasArray atlas;
@@ -157,12 +157,12 @@ namespace BasicUtility.TileMap
 
         public void UpdateChunkMesh(TilePosition pos)
         {
-            layers[pos.layerNumber].UpdateChunk(pos);
+            pos.layer.UpdateChunk(pos);
         }
 
         public void UpdateTileMesh(TilePosition pos)
         {
-            layers[pos.layerNumber].UpdateTile(pos);
+            pos.layer.UpdateTile(pos);
         }
 
         #endregion
@@ -184,7 +184,7 @@ namespace BasicUtility.TileMap
 
         public void GenerateChunkMesh(TilePosition pos)
         {
-            layers[pos.layerNumber].GenerateChunkMesh(pos.x, pos.y);
+            pos.layer.GenerateChunkMesh(pos.x, pos.y);
         }
 
         #endregion
@@ -195,7 +195,7 @@ namespace BasicUtility.TileMap
             {
                 //Debug.Log("Layer: " + pos.layerNumber + " X_chunk: " + pos.chunk_x + " Y_chunk: " + pos.chunk_y + " X: " + pos.x + " Y: " + pos.y);
 
-                Chunk chunk = layers[pos.layerNumber].chunkGrid[pos.chunk_x, pos.chunk_y];
+                Chunk chunk = pos.layer.chunkGrid[pos.chunk_x, pos.chunk_y];
 
                 tileClass.SetupTile(this, pos);
 
@@ -232,7 +232,7 @@ namespace BasicUtility.TileMap
 
         public TileBehaviour GetTile(TilePosition pos)
         {
-            Chunk chunk = layers[pos.layerNumber].chunkGrid[pos.chunk_x, pos.chunk_y];
+            Chunk chunk = pos.layer.chunkGrid[pos.chunk_x, pos.chunk_y];
 
             return chunk.grid[pos.x, pos.y];
         }
@@ -367,7 +367,7 @@ namespace BasicUtility.TileMap
             }
         }
 
-        void DrawGrid(float size_x, float size_y, int count_x, int count_y, Vector3 pos, Quaternion rot, TileVectorTypes type, Color c)
+        void DrawGrid(float size_x, float size_y, int count_x, int count_y, Vector3 pos, Quaternion rot, MapOrientation type, Color c)
         {
             float h = count_y * size_y;
             float w = count_x * size_x;
@@ -375,15 +375,15 @@ namespace BasicUtility.TileMap
             Gizmos.color = c;
 
             Vector3 trans;
-            if (oriantion == TileVectorTypes.xSwaped)
+            if (oriantion == MapOrientation.xSwaped)
             {
                 trans = new Vector3(-1, 1, 1);
             }
-            else if (oriantion == TileVectorTypes.ySwaped)
+            else if (oriantion == MapOrientation.ySwaped)
             {
                 trans = new Vector3(1, -1, 1);
             }
-            else if (oriantion == TileVectorTypes.xySwaped)
+            else if (oriantion == MapOrientation.xySwaped)
             {
                 trans = new Vector3(-1, -1, 1);
             }
@@ -500,6 +500,7 @@ namespace BasicUtility.TileMap
         [HideInInspector]
         public bool isExpanded;
         public string name = "New Layer";
+        public int number;
 
         public bool showGrid = true;
         public Color color = Color.red;
@@ -519,9 +520,10 @@ namespace BasicUtility.TileMap
 
         public bool[,] updateMap;
 
-        public Layer(TileMap t_map)
+        public Layer(TileMap t_map, int num)
         {
             map = t_map;
+            number = num;
 
             chunkSize_x = map.chunk_size_x;
             chunkSize_y = map.chunk_size_y;
@@ -628,8 +630,8 @@ namespace BasicUtility.TileMap
                 {
                     if (chunkGrid != null && chunkGrid[x, y] != null && chunkGrid[x, y].HasMesh())
                     {
-                        int x_cord = ((map.oriantion == TileVectorTypes.xSwaped) || (map.oriantion == TileVectorTypes.xySwaped)) ? -x : x;
-                        int y_cord = ((map.oriantion == TileVectorTypes.ySwaped) || (map.oriantion == TileVectorTypes.xySwaped)) ? -y : y;
+                        int x_cord = ((map.oriantion == MapOrientation.xSwaped) || (map.oriantion == MapOrientation.xySwaped)) ? -x : x;
+                        int y_cord = ((map.oriantion == MapOrientation.ySwaped) || (map.oriantion == MapOrientation.xySwaped)) ? -y : y;
 
                         //Debug.Log(((map.oriantion == TileVectorTypes.ySwaped) && (map.oriantion == TileVectorTypes.xySwaped)) ? -y : y);
 
@@ -704,8 +706,8 @@ namespace BasicUtility.TileMap
             {
                 for (int y = 0; y < layer.chunkSize_y; y++)
                 {
-                    int x_cord = ((layer.map.oriantion == TileVectorTypes.xSwaped) || (layer.map.oriantion == TileVectorTypes.xySwaped)) ? -(x + 1) : x;
-                    int y_cord = ((layer.map.oriantion == TileVectorTypes.ySwaped) || (layer.map.oriantion == TileVectorTypes.xySwaped)) ? -(y + 1) : y;
+                    int x_cord = ((layer.map.oriantion == MapOrientation.xSwaped) || (layer.map.oriantion == MapOrientation.xySwaped)) ? -(x + 1) : x;
+                    int y_cord = ((layer.map.oriantion == MapOrientation.ySwaped) || (layer.map.oriantion == MapOrientation.xySwaped)) ? -(y + 1) : y;
 
                     //Debug.Log(((layer.map.oriantion == TileVectorTypes.ySwaped) && (layer.map.oriantion == TileVectorTypes.xySwaped)) ? y : -(y + 1));
 
@@ -974,7 +976,7 @@ namespace BasicUtility.TileMap
         Layer layer;
         Chunk chunk;
 
-        public TilePosition pos { private set; get; }
+        public TilePosition position { private set; get; }
 
         Sprite _sprite;
         public Sprite sprite
@@ -988,8 +990,27 @@ namespace BasicUtility.TileMap
                 _sprite = value;
                 if (map != null)
                 {
-                    chunk.tileChanges[pos.x, pos.y] = true;
-                    layer.updateMap[pos.chunk_x, pos.chunk_y] = true;
+                    chunk.tileChanges[position.x, position.y] = true;
+                    layer.updateMap[position.chunk_x, position.chunk_y] = true;
+                }
+            }
+        }
+
+        GameObject _gameobject;
+        public GameObject gameobject
+        {
+            get
+            {
+                return _gameobject;
+            }
+            private set
+            {
+                if (value != null)
+                {
+                    _gameobject = value;
+
+                    //TODO:fix
+                    //_gameobject.transform.position = position;
                 }
             }
         }
@@ -1019,9 +1040,9 @@ namespace BasicUtility.TileMap
         internal void SetupTile(TileMap setMap, TilePosition setPos)
         {
             map = setMap;
-            layer = map.layers[setPos.layerNumber];
+            layer = setPos.layer;
             chunk = layer.chunkGrid[setPos.chunk_x, setPos.chunk_y];
-            pos = setPos;
+            position = setPos;
 
 
             //Thread a = new Thread(SetupEvents);
@@ -1060,12 +1081,16 @@ namespace BasicUtility.TileMap
 
     public class TilePosition
     {
-        public int layerNumber;
-        public int chunk_x;
-        public int chunk_y;
+        public Layer layer;
 
         public int x;
         public int y;
+
+        public int chunk_x;
+        public int chunk_y;
+
+        public int chunk_relative_x;
+        public int chunk_relative_y;
 
         TileMap mapGrid;
 
@@ -1073,72 +1098,117 @@ namespace BasicUtility.TileMap
 
         public TilePosition(int layer, int ChunkX, int ChunkY, int posX, int posY, TileMap map)
         {
-            mapGrid = map;
-
-            layerNumber = layer;
-
-            chunk_x = ChunkX;
-            chunk_y = ChunkY;
-
-
-            x = posX;
-            y = posY;
+            Init(layer, ChunkX, ChunkY, posX, posY, map);
         }
 
         public TilePosition(Layer layer, int ChunkX, int ChunkY, int posX, int posY)
         {
-            mapGrid = layer.map;
-
-            for (int i = 0; i < mapGrid.layers.Count; i++)
-            {
-                if (mapGrid.layers[i] == layer)
-                {
-                    layerNumber = i;
-                }
-            }
-
-            chunk_x = ChunkX;
-            chunk_y = ChunkY;
-
-
-            x = posX;
-            y = posY;
+             
+            
+            Init(layer.number, ChunkX, ChunkY, posX, posY, layer.map);
         }
 
         public TilePosition(Layer layer, int posX, int posY)
         {
-            mapGrid = layer.map;
-
-            for (int i = 0; i < mapGrid.layers.Count; i++)
-            {
-                if (mapGrid.layers[i] == layer)
-                {
-                    layerNumber = i;
-                }
-            }
-
-            chunk_x = posX / mapGrid.chunk_size_x;
-            chunk_y = posY / mapGrid.chunk_size_y;
 
 
-            x = posX % mapGrid.chunk_size_x;
-            y = posY % mapGrid.chunk_size_y;
+            Init(layer.number, posX, posY, layer.map);
         }
 
         public TilePosition(int layer, int posX, int posY, TileMap map)
         {
+            this.Init(layer, posX, posY, map);
+        }
+
+        void Init(int layer, int posX, int posY, TileMap map)
+        {
             mapGrid = map;
 
-            layerNumber = layer;
+            this.layer = map.layers[layer];
 
             chunk_x = posX / mapGrid.chunk_size_x;
             chunk_y = posY / mapGrid.chunk_size_y;
 
 
-            x = posX % mapGrid.chunk_size_x;
-            y = posY % mapGrid.chunk_size_y;
-
+            chunk_relative_x = posX % mapGrid.chunk_size_x;
+            chunk_relative_y = posY % mapGrid.chunk_size_y;
         }
+
+        void Init(int layer, int ChunkX, int ChunkY, int posX, int posY, TileMap map)
+        {
+            mapGrid = map;
+
+            this.layer = map.layers[layer];
+
+            chunk_x = ChunkX;
+            chunk_y = ChunkY;
+
+            chunk_relative_x = posX;
+            chunk_relative_y = posY;
+        }
+
+        /// <summary>
+        /// Will use the layer of the first parameter
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        static public TilePosition operator +(TilePosition l, TilePosition r)
+        {
+            return new TilePosition(l.layer,l.x + r.x, l.y + r.y);
+        }
+
+        static public TilePosition operator -(TilePosition l, TilePosition r)
+        {
+            return new TilePosition(l.layer, l.x - r.x, l.y - r.y);
+        }
+
+        /*
+        static public implicit operator TilePosition(Vector2 v)
+        {
+            return new TilePosition(null,(int)v.x, (int)v.y);
+        }
+
+        static public implicit operator TilePosition(Vector3 v)
+        {
+            return new TilePosition(v.x, v.y);
+        }
+        */
+        /*
+        static public implicit operator Vector2(TilePosition v)
+        {
+            if (v.mapGrid.oriantion == MapOrientation.xSwaped)
+            {
+                return new Vector2(-v.relative_x, v.relative_y)+new Vector2(v.layer.position.x,v.layer.position.y);
+            }
+            else if (v.mapGrid.oriantion == MapOrientation.xySwaped)
+            {
+                return new Vector2(-v.relative_x, -v.relative_y) + new Vector2(v.layer.position.x, v.layer.position.y);
+            }
+            else if (v.mapGrid.oriantion == MapOrientation.ySwaped)
+            {
+                return new Vector2(v.relative_x, -v.relative_y) + new Vector2(v.layer.position.x, v.layer.position.y);
+            }
+            return new Vector2(v.relative_x, v.relative_y) + new Vector2(v.layer.position.x, v.layer.position.y);
+        }
+
+        static public implicit operator Vector3(TilePosition v)
+        {
+            if (v.swaping == MapOrientation.xSwaped)
+            {
+                return new Vector3(-v.relative_x, v.relative_y);
+            }
+            else if (v.swaping == MapOrientation.xySwaped)
+            {
+                return new Vector3(-v.relative_x, -v.relative_y);
+            }
+            else if (v.swaping == MapOrientation.ySwaped)
+            {
+                return new Vector3(v.relative_x, -v.relative_y);
+            }
+            return new Vector3(v.relative_x, v.relative_y);
+        }
+        */
     }
 
     public interface IAdvancedSprite
@@ -1147,7 +1217,7 @@ namespace BasicUtility.TileMap
     }
 
 
-    public enum TileVectorTypes
+    public enum MapOrientation
     {
         xSwaped,
         ySwaped,
