@@ -286,7 +286,7 @@ namespace BasicUtility.TileMap
         public void LayerAddItem(ReorderableList list)
         {
             TileMap TMap = (TileMap)target;
-            TMap.layers.Add(new Layer(TMap));
+            TMap.layers.Add(new Layer(TMap,TMap.layers.Count));
 
             EditorUtility.SetDirty(target);
         }
