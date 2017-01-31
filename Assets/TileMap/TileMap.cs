@@ -408,7 +408,7 @@ namespace BasicUtility.TileMap
                         h,
                         0
                     ), trans);
-                Gizmos.DrawLine(start+pos, end+pos);
+                Gizmos.DrawLine(start + pos, end + pos);
             }
 
             for (int i = 0; i < count_y + 1; i++)
@@ -427,7 +427,7 @@ namespace BasicUtility.TileMap
                         y,
                         0
                     ), trans);
-                Gizmos.DrawLine(start+pos, end+pos);
+                Gizmos.DrawLine(start + pos, end + pos);
             }
 
             Gizmos.color = Color.white;
@@ -657,11 +657,16 @@ namespace BasicUtility.TileMap
 
         Vector2[] uvChanges;
         Vector2[] textureLayer;
+        Color[] color;
+
         internal bool[,] collisionChanges;
         internal bool collisionChanged;
-        internal bool[,] tileChanges;
 
+        internal bool[,] tileChanges;
         internal bool hasChanged;
+
+        internal bool[,] colorChanges;
+        internal bool colorChanged;
 
         public bool HasMesh()
         {
@@ -672,18 +677,23 @@ namespace BasicUtility.TileMap
         {
             layer = t_layer;
 
+            int numberTiles = layer.chunkSize_x * layer.chunkSize_y;
+            int verteciesCount = numberTiles * 4;
+
+            layer = t_layer;
+
             chunkPos_x = x;
             chunkPos_y = y;
 
             grid = new TileBehaviour[layer.chunkSize_x, layer.chunkSize_y];
+
             tileChanges = new bool[layer.chunkSize_x, layer.chunkSize_y];
             collisionChanges = new bool[layer.chunkSize_x, layer.chunkSize_y];
-
-            int numberTiles = layer.chunkSize_x * layer.chunkSize_y;
-            int verteciesCount = numberTiles * 4;
+            colorChanges = new bool[layer.chunkSize_x, layer.chunkSize_y];
 
             uvChanges = new Vector2[verteciesCount];
             textureLayer = new Vector2[verteciesCount];
+            color = new Color[verteciesCount];
         }
 
 
@@ -695,8 +705,9 @@ namespace BasicUtility.TileMap
             // Generate the mesh data
             Vector3[] vertices = new Vector3[verteciesCount];
             Vector3[] normals = new Vector3[verteciesCount];
-            Vector2[] uv = new Vector2[verteciesCount];
-            Vector2[] uv2 = new Vector2[verteciesCount];
+            //Vector2[] uv = new Vector2[verteciesCount];
+            //Vector2[] uv2 = new Vector2[verteciesCount];
+            //Color[] vertColor = new Color[verteciesCount];
 
             int[] triangles = new int[numberTiles * 2 * 3];
 
@@ -709,8 +720,7 @@ namespace BasicUtility.TileMap
                     int x_cord = ((layer.map.oriantion == MapOrientation.xSwaped) || (layer.map.oriantion == MapOrientation.xySwaped)) ? -(x + 1) : x;
                     int y_cord = ((layer.map.oriantion == MapOrientation.ySwaped) || (layer.map.oriantion == MapOrientation.xySwaped)) ? -(y + 1) : y;
 
-                    //Debug.Log(((layer.map.oriantion == TileVectorTypes.ySwaped) && (layer.map.oriantion == TileVectorTypes.xySwaped)) ? y : -(y + 1));
-
+                    
                     int tile = (layer.chunkSize_x * y * 4) + (x * 4);
                     int a = 0;
                     vertices[tile + 2] = new Vector3(x_cord * tileSize.x, y_cord * tileSize.y, a);
@@ -719,10 +729,10 @@ namespace BasicUtility.TileMap
                     vertices[tile + 1] = new Vector3((x_cord * tileSize.x) + tileSize.x, (y_cord * tileSize.y) + tileSize.y, a);
 
 
-
                     GenUvData(x, y);
-                    uv = uvChanges;
-                    uv2 = textureLayer;
+                    //uv = uvChanges;
+                    //uv2 = textureLayer;
+                    
 
                     int squareIndex = y * layer.chunkSize_x + x;
                     int triOffset = squareIndex * 6;
@@ -740,11 +750,14 @@ namespace BasicUtility.TileMap
 
             // Create a new Mesh and populate with the data
             Mesh mesh = new Mesh();
+
             mesh.vertices = vertices;
             mesh.triangles = triangles;
             mesh.normals = normals;
-            mesh.uv = uv;
-            mesh.uv2 = uv2;
+
+            mesh.uv = uvChanges;
+            mesh.uv2 = textureLayer;
+            mesh.colors = color;
 
             mesh.name = "Chunk " + chunkPos_x + ", " + chunkPos_y + "";
 
@@ -857,6 +870,7 @@ namespace BasicUtility.TileMap
 
             tileMesh.uv = uvChanges;
             tileMesh.uv2 = textureLayer;
+            tileMesh.colors = color;
 
             if (collisionChanged)
             {
@@ -866,69 +880,72 @@ namespace BasicUtility.TileMap
             layer.updateMap[chunkPos_x, chunkPos_y] = false;
         }
 
+
+
         //public bool a = true;
 
         public void GenUvData(int x, int y)
         {
-            //int numberTiles = layer.chunkSize_x * layer.chunkSize_y;
-            //int verteciesCount = numberTiles * 4;
-
-            /*
-            input = new Vector2[2][];
-
-            input[0] = new Vector2[verteciesCount];
-            input[1] = new Vector2[verteciesCount];
-            */
             int tile = (layer.chunkSize_x * y * 4) + (x * 4);
 
-            for (int i = 0; i < 4; i++)
+            Vector2[] tileUV = null;
+            int atlasLayer = 0;
+            Color tileColor = Color.white;
+
+            bool empty = false;
+
+            Texture texture = null;
+            TileBehaviour currentTile = grid[x, y];
+
+            if (currentTile != null && (currentTile.sprite != null || (currentTile is IAdvancedSprite && ((IAdvancedSprite)currentTile).GetSprite(x, y, layer) != null)))
             {
-                if (grid[x, y] != null && (grid[x, y].sprite != null || grid[x, y] is IAdvancedSprite))
+
+                if (grid[x, y] is IAdvancedSprite)
                 {
-                    //Rect pos = grid[x, y].sprite.rect;
-                   
-
-
-                    if (grid[x,y] is IAdvancedSprite)
-                    {
-                        
-                        uvChanges[tile + i] = ((IAdvancedSprite)grid[x, y]).GetSprite(x,y,layer).uv[i];
-
-                        for (int k = 0; k < layer.map.referenceAtlases.Count; k++)
-                        {
-                            if (layer.map.referenceAtlases[k] == ((IAdvancedSprite)grid[x, y]).GetSprite(x, y, layer).texture)
-                            {
-                                textureLayer[tile + i] = new Vector2(k, 0);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        uvChanges[tile + i] = grid[x, y].sprite.uv[i];
-
-                        for (int k = 0; k < layer.map.referenceAtlases.Count; k++)
-                        {
-                            if (layer.map.referenceAtlases[k] == grid[x, y].sprite.texture)
-                            {
-                                textureLayer[tile + i] = new Vector2(k, 0);
-                            }
-                        }
-                    }
-
-
-
-
+                    texture = ((IAdvancedSprite)currentTile).GetSprite(x, y, layer).texture;
+                    tileUV = ((IAdvancedSprite)currentTile).GetSprite(x, y, layer).uv;
+                    //TODO: Change when IAdvancedSprite has color
+                    tileColor = Color.white;
                 }
                 else
                 {
-                    uvChanges[tile + i] = TileMap.uvDef[i];
+                    texture = currentTile.sprite.texture;
+                    tileUV = currentTile.sprite.uv;
+                    tileColor = currentTile.color;
+                }
 
-                    textureLayer[tile + i] = new Vector2(255, 255);
+                for (int k = 0; k < layer.map.referenceAtlases.Count; k++)
+                {
+                    if (layer.map.referenceAtlases[k] == texture)
+                    {
+                        atlasLayer = k;
+                    }
                 }
             }
-            
-            //return a;
+            else
+            {
+                tileUV = TileMap.uvDef;
+                empty = true;
 
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                uvChanges[tile + i] = tileUV[i];
+                color[tile + i] = tileColor;
+
+
+                if (!empty)
+                {
+                    textureLayer[tile + i] = new Vector2(atlasLayer, 0);
+                }
+                else
+                {
+                    textureLayer[tile + i] = new Vector2(255, 255);
+                }
+
+                Debug.Log("Layer: " + textureLayer[tile + i] + ", uv: " + uvChanges[tile + i]);
+            }
         }
 
         /*
@@ -988,6 +1005,24 @@ namespace BasicUtility.TileMap
             set
             {
                 _sprite = value;
+                if (map != null)
+                {
+                    chunk.tileChanges[position.x, position.y] = true;
+                    layer.updateMap[position.chunk_x, position.chunk_y] = true;
+                }
+            }
+        }
+
+        Color _color;
+        public Color color
+        {
+            get
+            {
+                return _color;
+            }
+            set
+            {
+                _color = value;
                 if (map != null)
                 {
                     chunk.tileChanges[position.x, position.y] = true;
@@ -1103,8 +1138,8 @@ namespace BasicUtility.TileMap
 
         public TilePosition(Layer layer, int ChunkX, int ChunkY, int posX, int posY)
         {
-             
-            
+
+
             Init(layer.number, ChunkX, ChunkY, posX, posY, layer.map);
         }
 
@@ -1132,6 +1167,9 @@ namespace BasicUtility.TileMap
 
             chunk_relative_x = posX % mapGrid.chunk_size_x;
             chunk_relative_y = posY % mapGrid.chunk_size_y;
+
+            x = posX;
+            y = posY;
         }
 
         void Init(int layer, int ChunkX, int ChunkY, int posX, int posY, TileMap map)
@@ -1145,6 +1183,9 @@ namespace BasicUtility.TileMap
 
             chunk_relative_x = posX;
             chunk_relative_y = posY;
+
+            x = chunk_x * map.chunk_size_x + chunk_relative_x;
+            y = chunk_y * map.chunk_size_y + chunk_relative_y;
         }
 
         /// <summary>
@@ -1155,7 +1196,7 @@ namespace BasicUtility.TileMap
         /// <returns></returns>
         static public TilePosition operator +(TilePosition l, TilePosition r)
         {
-            return new TilePosition(l.layer,l.x + r.x, l.y + r.y);
+            return new TilePosition(l.layer, l.x + r.x, l.y + r.y);
         }
 
         static public TilePosition operator -(TilePosition l, TilePosition r)
@@ -1174,6 +1215,8 @@ namespace BasicUtility.TileMap
             return new TilePosition(v.x, v.y);
         }
         */
+
+        //TODO: Do the math so the convertion is good
         /*
         static public implicit operator Vector2(TilePosition v)
         {

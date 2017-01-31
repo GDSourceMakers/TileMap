@@ -39,6 +39,7 @@
 				float4 vertex	: POSITION;
 				float2 uv		: TEXCOORD0;
 				float4 atlasMap : TEXCOORD1;
+				float4 color    : COLOR;
 			};
 
 			struct v2f
@@ -52,6 +53,8 @@
 			sampler2D _MissingTex;
 			float4 _MainTex_ST;
 
+			fixed4 _Color;
+
 			v2f vert(appdata v)
 			{
 				v2f o;
@@ -62,6 +65,8 @@
 				o.uv.x = v.uv.x;
 				o.uv.y = v.uv.y;
 				o.uv.z = v.atlasMap.x;
+
+				o.color = v.color * _Color;
 
 				return o;
 			}
@@ -83,7 +88,9 @@
 					//color.b = 255;
 					//color.g = 255;
 					//color.a = 255;
-					color.rgb *= color.a;
+					color = color * input.color;
+					//color.rgb *= color.a;
+					//color.a = 255;
 				}
 
 				return color;

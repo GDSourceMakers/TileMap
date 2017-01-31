@@ -151,7 +151,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 33.98996
+  orthographic size: 10.4
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -208,10 +208,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   map: {fileID: 1628968127}
-  tileSprite: {fileID: 21300000, guid: 9ff27cd91ec449248a83637330247d43, type: 3}
-  tileSpriteSecound: {fileID: 21300002, guid: 9ff27cd91ec449248a83637330247d43, type: 3}
-  x_max: 16
-  y_max: 16
+  tileSprite: {fileID: 21300002, guid: 9ff27cd91ec449248a83637330247d43, type: 3}
+  tileSpriteSecound: {fileID: 21300000, guid: 9ff27cd91ec449248a83637330247d43, type: 3}
+  x_max: 2
+  y_max: 2
 --- !u!114 &1628968127
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,46 +223,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1b6102419deb6b40b576702986692ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  map_x: 16
-  map_y: 16
-  chunk_size_x: 16
-  chunk_size_y: 16
+  map_x: 2
+  map_y: 2
+  chunk_size_x: 2
+  chunk_size_y: 2
   chunk_count_x: 1
   chunk_count_y: 1
   tileSize: {x: 1, y: 1}
-  oriantion: 0
+  oriantion: 3
   textureArray: {fileID: 0}
   referenceAtlases:
   - {fileID: 2800000, guid: 9ff27cd91ec449248a83637330247d43, type: 3}
-  missingTexture: {fileID: 0}
+  missingTexture: {fileID: 2800000, guid: 6c430f306e63943498d57856a14d5b7b, type: 3}
   textureSize: 64
-  autoGenMesh: 1
+  autoGenMesh: 0
   autoGenCollision: 0
-  autoUpdateMesh: 1
+  autoUpdateMesh: 0
   tileMat: {fileID: 0}
   layers:
   - isExpanded: 1
     name: Multi
+    number: 0
     showGrid: 1
     color: {r: 0, g: 0.75172424, b: 1, a: 1}
-    position: {x: 25.193182, y: 15.718825, z: 0}
+    position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0, w: 1}
     map: {fileID: 1628968127}
     chunkSize_x: 16
     chunkSize_y: 16
     chunkCount_x: 100
     chunkCount_y: 100
-  - isExpanded: 1
-    name: Test Layer
-    showGrid: 1
-    color: {r: 1, g: 0, b: 0, a: 1}
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 1}
-    map: {fileID: 1628968127}
-    chunkSize_x: 64
-    chunkSize_y: 64
-    chunkCount_x: 1
-    chunkCount_y: 1
 --- !u!4 &1628968128
 Transform:
   m_ObjectHideFlags: 0

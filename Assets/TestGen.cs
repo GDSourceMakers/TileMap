@@ -19,6 +19,8 @@ public class TestGen : MonoBehaviour
 	public int x_max;
 	public int y_max;
 
+    public Color testColor;
+
 	// Use this for initialization
 	void Start()
 	{
@@ -27,13 +29,13 @@ public class TestGen : MonoBehaviour
 			for (int j = 0; j < y_max; j++)
 			{
 
-				map.grid[i, j, 0] = new TestTileClass(tileSprite);
+				map.grid[i, j, 0] = new TestTileClass(tileSprite, testColor);
 
 			}
 		}
-        TestAdvancedTile large = new TestAdvancedTile(tileSprite,tileSpriteSecound);
-        map.SetTile(large, new TilePosition(1, 0, 0, map));
-        map.SetTile(large, new TilePosition(1, 1, 0, map));
+        //TestAdvancedTile large = new TestAdvancedTile(tileSprite,tileSpriteSecound);
+        //map.SetTile(large, new TilePosition(1, 0, 0, map));
+        //map.SetTile(large, new TilePosition(1, 1, 0, map));
 
         map.GenerateAllMesh();
 
@@ -75,13 +77,15 @@ public class TestGen : MonoBehaviour
 
 public class TestTileClass : TileBehaviour
 {
-	public TestTileClass(Sprite setTexture)
+	public TestTileClass(Sprite setTexture, Color tColor)
 	{
 		TileSetup(true, true,this);
 
 		sprite = setTexture;
 
-		colider = true;
+        color = tColor;
+
+        colider = true;
 	}
 
 	public void Start()
