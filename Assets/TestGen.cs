@@ -8,10 +8,6 @@ using System;
 public class TestGen : MonoBehaviour
 {
 
-	//public GameObject testSprite;
-	//public TileMap tMap;
-	//public List<TileLayer> test;
-
 	public TileMap map;
 	public Sprite tileSprite;
 	public Sprite tileSpriteSecound;
@@ -21,25 +17,31 @@ public class TestGen : MonoBehaviour
 
     public Color testColor;
 
-	// Use this for initialization
-	void Start()
+
+    TileBehaviour beh;
+    // Use this for initialization
+    void Start()
 	{
+        beh = new TileBehaviour();
+        beh.sprite = tileSprite;
+        //beh.color = testColor;
+
 		for (int i = 0; i < x_max; i++)
 		{
 			for (int j = 0; j < y_max; j++)
 			{
 
-				map.grid[i, j, 0] = new TestTileClass(tileSprite, testColor);
-
+                //map.grid[i, j, 0] = new TestTileClass(tileSprite, testColor);
+                map.SetTile(beh, new TilePosition(0, i, j, map));
 			}
 		}
         //TestAdvancedTile large = new TestAdvancedTile(tileSprite,tileSpriteSecound);
         //map.SetTile(large, new TilePosition(1, 0, 0, map));
         //map.SetTile(large, new TilePosition(1, 1, 0, map));
 
-        map.GenerateAllMesh();
+        //map.GenerateAllMesh();
 
-		StartCoroutine(Draw());
+		//StartCoroutine(Draw());
 	}
 
 	// Update is called once per frame
@@ -70,7 +72,7 @@ public class TestGen : MonoBehaviour
 			}
 		}
 
-		StartCoroutine(Draw());
+		//StartCoroutine(Draw());
 	}
 
 }

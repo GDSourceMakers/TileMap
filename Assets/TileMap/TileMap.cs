@@ -25,8 +25,8 @@ namespace BasicUtility.TileMap
     {
         #region variables
         //[Header("Size")]
-        public int map_x;
-        public int map_y;
+        public int map_x = 1;
+        public int map_y = 1;
         //[Space]
         public int chunk_size_x = 64;
         public int chunk_size_y = 64;
@@ -34,7 +34,7 @@ namespace BasicUtility.TileMap
         public int chunk_count_x = 1;
         public int chunk_count_y = 1;
         //[Space]
-        public Vector2 tileSize;
+        public Vector2 tileSize = Vector2.one;
 
         //[Header("Oriantion")]
         public MapOrientation oriantion;
@@ -150,17 +150,17 @@ namespace BasicUtility.TileMap
             }
         }
 
-        public void UpdateLayerMesh(int i)
+        public void UpdateLayer(int i)
         {
             layers[i].UpdateLayer();
         }
 
-        public void UpdateChunkMesh(TilePosition pos)
+        public void UpdateChunk(TilePosition pos)
         {
             pos.layer.UpdateChunk(pos);
         }
 
-        public void UpdateTileMesh(TilePosition pos)
+        public void UpdateTile(TilePosition pos)
         {
             pos.layer.UpdateTile(pos);
         }
@@ -184,7 +184,7 @@ namespace BasicUtility.TileMap
 
         public void GenerateChunkMesh(TilePosition pos)
         {
-            pos.layer.GenerateChunkMesh(pos.x, pos.y);
+            pos.layer.GenerateChunkMesh(pos.chunk_x, pos.chunk_y);
         }
 
         #endregion
@@ -199,7 +199,7 @@ namespace BasicUtility.TileMap
 
                 tileClass.SetupTile(this, pos);
 
-                chunk.grid[pos.x, pos.y] = tileClass;
+                chunk.grid[pos.chunk_relative_x, pos.chunk_relative_y] = tileClass;
 
                 if (auto)
                 {
@@ -224,17 +224,17 @@ namespace BasicUtility.TileMap
             pos.chunk_x < chunk_count_x &&
             pos.chunk_y >= 0 &&
             pos.chunk_y < chunk_count_y &&
-            pos.x >= 0 &&
-            pos.x < chunk_size_x &&
-            pos.y >= 0 &&
-            pos.y < chunk_size_y;
+            pos.chunk_relative_x >= 0 &&
+            pos.chunk_relative_x < chunk_size_x &&
+            pos.chunk_relative_y >= 0 &&
+            pos.chunk_relative_y < chunk_size_y;
         }
 
         public TileBehaviour GetTile(TilePosition pos)
         {
             Chunk chunk = pos.layer.chunkGrid[pos.chunk_x, pos.chunk_y];
 
-            return chunk.grid[pos.x, pos.y];
+            return chunk.grid[pos.chunk_relative_x, pos.chunk_relative_y];
         }
 
 
@@ -255,6 +255,8 @@ namespace BasicUtility.TileMap
 
         public void BuildAtlas()
         {
+            if (textureSize == 0 || (referenceAtlases == null && referenceAtlases.Count == 0))
+                return;
 
             textureArray = new Texture2DArray(textureSize, textureSize, referenceAtlases.Count, TextureFormat.ARGB32, true);
             textureArray.filterMode = FilterMode.Point;
@@ -319,6 +321,11 @@ namespace BasicUtility.TileMap
 
         void OnDrawGizmos()
         {
+            if (layers == null || layers.Count == 0)
+            {
+                return;
+            }
+
             int grid_x;
             int grid_y;
 
@@ -656,17 +663,16 @@ namespace BasicUtility.TileMap
         public TileBehaviour[,] grid;
 
         Vector2[] uvChanges;
-        Vector2[] textureLayer;
-        Color[] color;
+        Vector2[] textureLayerChanges;
+        Color[] colorChanges;
 
         internal bool[,] collisionChanges;
         internal bool collisionChanged;
 
         internal bool[,] tileChanges;
-        internal bool hasChanged;
 
-        internal bool[,] colorChanges;
-        internal bool colorChanged;
+        //internal bool[,] colorChanges;
+        //internal bool colorChanged;
 
         public bool HasMesh()
         {
@@ -689,11 +695,11 @@ namespace BasicUtility.TileMap
 
             tileChanges = new bool[layer.chunkSize_x, layer.chunkSize_y];
             collisionChanges = new bool[layer.chunkSize_x, layer.chunkSize_y];
-            colorChanges = new bool[layer.chunkSize_x, layer.chunkSize_y];
+            //colorChanges = new bool[layer.chunkSize_x, layer.chunkSize_y];
 
             uvChanges = new Vector2[verteciesCount];
-            textureLayer = new Vector2[verteciesCount];
-            color = new Color[verteciesCount];
+            textureLayerChanges = new Vector2[verteciesCount];
+            colorChanges = new Color[verteciesCount];
         }
 
 
@@ -705,9 +711,6 @@ namespace BasicUtility.TileMap
             // Generate the mesh data
             Vector3[] vertices = new Vector3[verteciesCount];
             Vector3[] normals = new Vector3[verteciesCount];
-            //Vector2[] uv = new Vector2[verteciesCount];
-            //Vector2[] uv2 = new Vector2[verteciesCount];
-            //Color[] vertColor = new Color[verteciesCount];
 
             int[] triangles = new int[numberTiles * 2 * 3];
 
@@ -756,8 +759,8 @@ namespace BasicUtility.TileMap
             mesh.normals = normals;
 
             mesh.uv = uvChanges;
-            mesh.uv2 = textureLayer;
-            mesh.colors = color;
+            mesh.uv2 = textureLayerChanges;
+            mesh.colors = colorChanges;
 
             mesh.name = "Chunk " + chunkPos_x + ", " + chunkPos_y + "";
 
@@ -838,13 +841,15 @@ namespace BasicUtility.TileMap
                 return;
             }
 
-            if (tileChanges[pos.x, pos.y])
+            if (tileChanges[pos.chunk_relative_x, pos.chunk_relative_y])
             {
-                GenUvData(pos.x, pos.y);
+                GenUvData(pos.chunk_relative_x, pos.chunk_relative_y);
 
-                tileChanges[pos.x, pos.y] = false;
+                ApplyUpdates();
+
+                tileChanges[pos.chunk_relative_x, pos.chunk_relative_y] = false;
             }
-            if (collisionChanges[pos.x, pos.y])
+            if (collisionChanges[pos.chunk_relative_x, pos.chunk_relative_y])
             {
                 GenerateCollision();
             }
@@ -852,8 +857,6 @@ namespace BasicUtility.TileMap
 
         public void UpdateChunk()
         {
-
-
             for (int x = 0; x < layer.chunkSize_x; x++)
             {
                 for (int y = 0; y < layer.chunkSize_y; y++)
@@ -868,9 +871,7 @@ namespace BasicUtility.TileMap
                 }
             }
 
-            tileMesh.uv = uvChanges;
-            tileMesh.uv2 = textureLayer;
-            tileMesh.colors = color;
+            ApplyUpdates();
 
             if (collisionChanged)
             {
@@ -932,32 +933,29 @@ namespace BasicUtility.TileMap
             for (int i = 0; i < 4; i++)
             {
                 uvChanges[tile + i] = tileUV[i];
-                color[tile + i] = tileColor;
+                colorChanges[tile + i] = tileColor;
 
 
                 if (!empty)
                 {
-                    textureLayer[tile + i] = new Vector2(atlasLayer, 0);
+                    textureLayerChanges[tile + i] = new Vector2(atlasLayer, 0);
                 }
                 else
                 {
-                    textureLayer[tile + i] = new Vector2(255, 255);
+                    textureLayerChanges[tile + i] = new Vector2(255, 255);
                 }
 
-                Debug.Log("Layer: " + textureLayer[tile + i] + ", uv: " + uvChanges[tile + i]);
+                //Debug.Log("Layer: " + textureLayer[tile + i] + ", uv: " + uvChanges[tile + i]);
             }
         }
 
-        /*
-		[Obsolete()]
-		public void ApplyChanges()
+		public void ApplyUpdates()
 		{
-			if (hasChanged)
-			{
-				tileMesh.uv = uvChanges;
-			}
-		}
-		*/
+            tileMesh.uv = uvChanges;
+            tileMesh.uv2 = textureLayerChanges;
+            tileMesh.colors = colorChanges;
+        }
+		
         /*
 		[Obsolete()]
 		public void UpdateChunkMesh()
@@ -1007,13 +1005,12 @@ namespace BasicUtility.TileMap
                 _sprite = value;
                 if (map != null)
                 {
-                    chunk.tileChanges[position.x, position.y] = true;
-                    layer.updateMap[position.chunk_x, position.chunk_y] = true;
+                    MarkDirty();
                 }
             }
         }
 
-        Color _color;
+        Color _color = Color.white;
         public Color color
         {
             get
@@ -1025,8 +1022,7 @@ namespace BasicUtility.TileMap
                 _color = value;
                 if (map != null)
                 {
-                    chunk.tileChanges[position.x, position.y] = true;
-                    layer.updateMap[position.chunk_x, position.chunk_y] = true;
+                    MarkDirty();
                 }
             }
         }
@@ -1079,9 +1075,17 @@ namespace BasicUtility.TileMap
             chunk = layer.chunkGrid[setPos.chunk_x, setPos.chunk_y];
             position = setPos;
 
+            MarkDirty();
 
             //Thread a = new Thread(SetupEvents);
             //a.Start();
+        }
+
+        public void MarkDirty ()
+        {
+            chunk.tileChanges[position.chunk_relative_x, position.chunk_relative_y] = true;
+            layer.updateMap[position.chunk_x, position.chunk_y] = true;
+
         }
 
         /*

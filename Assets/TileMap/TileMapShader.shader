@@ -83,13 +83,15 @@
 				}
 				else
 				{
-					color = UNITY_SAMPLE_TEX2DARRAY(_MainTex, input.uv);
+					
 					//color.r = 255;
 					//color.b = 255;
-					//color.g = 255;
+					
 					//color.a = 255;
-					color = color * input.color;
-					//color.rgb *= color.a;
+					color = UNITY_SAMPLE_TEX2DARRAY(_MainTex, input.uv) * input.color;
+					color.rgb *= color.a;
+					//color.g = 255;
+
 					//color.a = 255;
 				}
 

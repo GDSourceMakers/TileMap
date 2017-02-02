@@ -44,18 +44,40 @@ namespace BasicUtility.TileMap
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+            Color original = GUI.color;
+            
+            if(tileSize.vector2Value.x == 0 || tileSize.vector2Value.y == 0)
+                GUI.color = Color.red;
 
             EditorGUILayout.PropertyField(tileSize);
+
+            GUI.color = original;
+
+            //#####################################################################################
+
+            if (chunkSize_x.intValue == 0 || chunkSize_y.intValue == 0)
+                GUI.color = Color.red;
 
             Vector2 c_size = new Vector2(chunkSize_x.intValue, chunkSize_y.intValue);
             c_size = EditorGUILayout.Vector2Field("Chnuk Size", c_size);
             chunkSize_x.intValue = (int)c_size.x;
             chunkSize_y.intValue = (int)c_size.y;
 
+            GUI.color = original;
+
+            //#####################################################################################
+
+            if (chunkCount_x.intValue == 0 || chunkCount_y.intValue == 0)
+                GUI.color = Color.red;
+
             Vector2 c_count = new Vector2(chunkCount_x.intValue, chunkCount_y.intValue);
             c_count = EditorGUILayout.Vector2Field("Chnuk Count", c_count);
             chunkCount_x.intValue = (int)c_count.x;
             chunkCount_y.intValue = (int)c_count.y;
+
+            GUI.color = original;
+
+            //#####################################################################################
 
             map_x.intValue = chunkSize_x.intValue * chunkCount_x.intValue;
             map_y.intValue = chunkSize_y.intValue * chunkCount_y.intValue;
@@ -67,23 +89,44 @@ namespace BasicUtility.TileMap
             //EditorGUILayout.PropertyField(atlas);
             //atlas.objectReferenceValue = (AtlasArray)EditorGUILayout.ObjectField("Atlas Array", (AtlasArray)atlas.objectReferenceValue, typeof(AtlasArray), false);
 
+            //#####################################################################################
+
+            if (texSize.intValue == 0)
+                GUI.color = Color.red;
+
             EditorGUILayout.PropertyField(texSize);
+
+            GUI.color = original;
+
+            //#####################################################################################
 
             EditorGUILayout.PropertyField(missingtex);
 
+            //#####################################################################################
+            if (((TileMap)target).referenceAtlases == null || ((TileMap)target).referenceAtlases.Count == 0)
+                GUI.color = Color.red;
+
             atlasesList.DoLayoutList();
 
-            layersFold = serializedObject.FindProperty("layers").isExpanded;
-            layersFold = EditorGUILayout.Foldout(layersFold, new GUIContent("Layers", "Tile layers"));
-            serializedObject.FindProperty("layers").isExpanded = layersFold;
-            if (layersFold)
-            {
-                layerList.DoLayoutList();
-                //layers = serializedObject.FindProperty("layers");
-                //EditorGUILayout.PropertyField(layers,true);
-            }
+            GUI.color = original;
+            //#####################################################################################
 
-			EditorGUILayout.PropertyField(autoGenMesh);
+            //layersFold = serializedObject.FindProperty("layers").isExpanded;
+            // layersFold = EditorGUILayout.Foldout(layersFold, new GUIContent("Layers", "Tile layers"));
+            // serializedObject.FindProperty("layers").isExpanded = layersFold;
+            // if (layersFold)
+            //{
+            if (((TileMap)target).layers == null || ((TileMap)target).layers.Count == 0)
+                GUI.color = Color.red;
+
+            layerList.DoLayoutList();
+
+            GUI.color = original;
+            //layers = serializedObject.FindProperty("layers");
+            //EditorGUILayout.PropertyField(layers,true);
+            //}
+
+            EditorGUILayout.PropertyField(autoGenMesh);
 			EditorGUILayout.PropertyField(autoUpdateMesh);
 
 			serializedObject.ApplyModifiedProperties();
@@ -108,27 +151,27 @@ namespace BasicUtility.TileMap
 
             #endregion
 
-
             texSize = serializedObject.FindProperty("textureSize");
             missingtex = serializedObject.FindProperty("missingTexture");
 
             atlases = serializedObject.FindProperty("referenceAtlases");
 
-            atlasesList = new ReorderableList(serializedObject, atlases, true, true, true, true);
+            #region AtlasList
 
-            //atlasesList.drawElementBackgroundCallback = DrawBack;
+            atlasesList = new ReorderableList(serializedObject, atlases, true, true, true, true);
 
             atlasesList.elementHeight = EditorGUIUtility.singleLineHeight*1;
 
             atlasesList.drawHeaderCallback = rect =>
             {
-                EditorGUI.LabelField(rect, "Layers");
+                EditorGUI.LabelField(rect, "Atlas layers");
             };
 
             atlasesList.drawElementCallback = DrawAtlasesList;
 
             atlasesList.onAddCallback = AtlasesAddItem;
 
+            #endregion
 
             #region layers
 
